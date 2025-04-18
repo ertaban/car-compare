@@ -1,14 +1,11 @@
+# Import libraries
 import streamlit as st
-from streamlit_extras.switch_page_button import switch_page
-import base64
 
-st.title("🎈 Cihangir's app")
-st.write(
-    "This is the start of the new app!"
-)
-
-# Set page configuration
+# Set page configuration - MUST BE THE FIRST STREAMLIT COMMAND
 st.set_page_config(layout="wide", page_title="Car Class Navigator")
+
+# Import other libraries after st.set_page_config()
+import base64
 
 # Initialize session state if it doesn't exist
 if 'current_car_class' not in st.session_state:
@@ -22,23 +19,10 @@ current_index = car_classes.index(st.session_state.current_car_class)
 left_class = car_classes[current_index - 1] if current_index > 0 else None
 right_class = car_classes[current_index + 1] if current_index < len(car_classes) - 1 else None
 
-# Function to get appropriate car icon for each class
-def get_car_icon(car_class):
-    # Using Font Awesome icons encoded in base64 for simplicity
-    # In a real app, you might use actual car images
-    icons = {
-        "Compact": "fas fa-car",
-        "Mid-Size": "fas fa-car-side",
-        "Full-Size": "fas fa-car-alt",
-        "SUV": "fas fa-truck-monster",
-        "Luxury": "fas fa-car-luxury"
-    }
-    return icons.get(car_class, "fas fa-car")
-
 # Function to navigate to a different car class
 def navigate_to_class(new_class):
     st.session_state.current_car_class = new_class
-    st.experimental_rerun()
+    st.rerun()  # Using st.rerun() instead of st.experimental_rerun()
 
 # Custom CSS for styling
 st.markdown("""
@@ -54,7 +38,6 @@ st.markdown("""
     .car-icon {
         font-size: 5rem;
         margin: 0 2rem;
-        cursor: pointer;
     }
     .nav-icon {
         font-size: 3rem;
@@ -86,39 +69,31 @@ col1, col2, col3 = st.columns([1, 2, 1])
 
 with col1:
     # Left navigation
+    st.markdown("<div class='car-container'>", unsafe_allow_html=True)
     if left_class:
-        st.markdown(f"""
-        <div class="car-container" onclick="parent.postMessage({{action: 'navigate', class: '{left_class}'}}, '*')">
-            <i class="fas fa-chevron-circle-left nav-icon left-arrow"></i>
-            <div class="car-label">Go to {left_class}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # JavaScript to handle the click and communicate with Python
-        st.markdown("""
-        <script>
-        document.querySelector('.left-arrow').addEventListener('click', function() {
-            window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'left_clicked'}, '*');
-        });
-        </script>
-        """, unsafe_allow_html=True)
-        
-        # Handle the click with a button (hidden by CSS)
-        if st.button("Navigate Left", key="left_nav", help=f"Go to {left_class} class"):
+        if st.button("← Smaller", key="left_nav", help=f"Go to {left_class} class"):
             navigate_to_class(left_class)
+        st.markdown(f"<div class='car-label'>{left_class}</div>", unsafe_allow_html=True)
     else:
-        st.markdown("""
-        <div class="car-container">
-            <i class="fas fa-chevron-circle-left nav-icon disabled"></i>
-        </div>
-        """, unsafe_allow_html=True)
+        st.button("← Smaller", key="left_nav_disabled", disabled=True)
+        st.markdown("<div class='car-label'>&nbsp;</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with col2:
-    # Current car class
+    # Current car class - using emojis instead of Font Awesome for better compatibility
+    car_emojis = {
+        "Compact": "🚗",
+        "Mid-Size": "🚙",
+        "Full-Size": "🚘",
+        "SUV": "🚓",
+        "Luxury": "🏎️"
+    }
+    current_emoji = car_emojis.get(st.session_state.current_car_class, "🚗")
+    
     st.markdown(f"""
     <div class="car-container">
         <div>
-            <i class="{get_car_icon(st.session_state.current_car_class)} car-icon"></i>
+            <div style="font-size: 5rem; text-align: center;">{current_emoji}</div>
             <div class="car-label">{st.session_state.current_car_class}</div>
         </div>
     </div>
@@ -126,36 +101,11 @@ with col2:
 
 with col3:
     # Right navigation
+    st.markdown("<div class='car-container'>", unsafe_allow_html=True)
     if right_class:
-        st.markdown(f"""
-        <div class="car-container" onclick="parent.postMessage({{action: 'navigate', class: '{right_class}'}}, '*')">
-            <i class="fas fa-chevron-circle-right nav-icon right-arrow"></i>
-            <div class="car-label">Go to {right_class}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Handle the click with a button
-        if st.button("Navigate Right", key="right_nav", help=f"Go to {right_class} class"):
+        if st.button("Larger →", key="right_nav", help=f"Go to {right_class} class"):
             navigate_to_class(right_class)
+        st.markdown(f"<div class='car-label'>{right_class}</div>", unsafe_allow_html=True)
     else:
-        st.markdown("""
-        <div class="car-container">
-            <i class="fas fa-chevron-circle-right nav-icon disabled"></i>
-        </div>
-        """, unsafe_allow_html=True)
-
-# Display current car class details
-st.markdown("---")
-st.header(f"{st.session_state.current_car_class} Class Details")
-st.write(f"You are currently viewing the {st.session_state.current_car_class} car class.")
-
-# Placeholder for additional car details
-car_details = {
-    "Compact": "Small, fuel-efficient cars ideal for city driving and tight parking spaces.",
-    "Mid-Size": "Balanced size and comfort, suitable for small families and everyday use.",
-    "Full-Size": "Spacious sedans with ample legroom and trunk space for longer trips.",
-    "SUV": "High clearance vehicles with optional 4-wheel drive and more cargo space.",
-    "Luxury": "Premium vehicles with high-end features, materials, and performance."
-}
-
-st.write(car_details.get(st.session_state.current_car_class, ""))
+        st.button("Larger →", key="right_nav_disabled", disabled=True)
+        st.markdown("<div class='car-label'>&nbsp;</div>", unsafe_
