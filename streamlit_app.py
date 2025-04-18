@@ -108,4 +108,21 @@ with col3:
         st.markdown(f"<div class='car-label'>{right_class}</div>", unsafe_allow_html=True)
     else:
         st.button("Larger →", key="right_nav_disabled", disabled=True)
-        st.markdown("<div class='car-label'>&nbsp;</div>", unsafe_
+        st.markdown("<div class='car-label'>&nbsp;</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# Display current car class details
+st.markdown("---")
+st.header(f"{st.session_state.current_car_class} Class Details")
+st.write(f"You are currently viewing the {st.session_state.current_car_class} car class.")
+
+# Placeholder for additional car details
+car_details = {
+    "Compact": "Small, fuel-efficient cars ideal for city driving and tight parking spaces.",
+    "Mid-Size": "Balanced size and comfort, suitable for small families and everyday use.",
+    "Full-Size": "Spacious sedans with ample legroom and trunk space for longer trips.",
+    "SUV": "High clearance vehicles with optional 4-wheel drive and more cargo space.",
+    "Luxury": "Premium vehicles with high-end features, materials, and performance."
+}
+
+st.write(car_details.get(st.session_state.current_car_class, ""))
